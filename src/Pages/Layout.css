@@ -1,0 +1,21 @@
+.navbar {
+    box-shadow: 0 0.1em 0.5em 0 #334245;
+    display: flex;
+    align-items: center;
+}
+
+.navbar a {
+    text-decoration: none;
+    color: inherit;
+    padding: 1.5em;
+    transition: background-color 0.5s, color 0.5s;
+}
+
+.navbar a:hover {
+    background-color: #1f8566;
+    color: white;
+}
+
+.activelink {
+    background-color: #186850;
+}
