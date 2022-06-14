@@ -1,6 +1,19 @@
-# Getting Started with Create React App
+# Sheep Profiler
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## About
+
+This project aims to ease the process of cataloging your livestock.
+Planned features:
+    [ ] adding sheep profile
+    [ ] editing sheep profile
+    [ ] local based database
+    [ ] photo uploading
+    [ ] family tree visualisation
+    [ ] easy-to-use UI
+    [ ] 
+    [ ] 
+    [ ] 
+    [ ] 
 
 ## Available Scripts
 
