@@ -20,7 +20,8 @@ interface responseTypes {
 export default function SheepManager() {
     const [formData, setFormData] = useState({
         name: "",
-        dateOfBirth: new Date()
+        dateOfBirth: new Date(),
+        description: ""
     })
     const db = useDB('sheep_database')
 
@@ -44,7 +45,8 @@ export default function SheepManager() {
         db.put({
             _id: formData.name,
             name: formData.name,
-            dateOfBirth: formData.dateOfBirth
+            dateOfBirth: formData.dateOfBirth,
+            description: formData.description
         })
           .then(function (response: responseTypes) {
               console.log(response)
@@ -57,18 +59,6 @@ export default function SheepManager() {
         event.preventDefault()
     }
 
-    const sheepList = useFind(db, {
-        selector: {
-            name: { $gte: null }      // $gte znači "greater than or equal"; pronalazi sve entryje
-        },
-        sort: ["name"]
-    }).map((sheep: any) => (
-        <li key={sheep._id}>
-            {sheep.name} | {sheep.dateOfBirth}
-            <button onClick={() => db.remove(sheep)}>Remove</button>
-        </li>
-    ))
-
     return (
         <div>
             <form onSubmit={handleSubmit}>
@@ -80,6 +70,20 @@ export default function SheepManager() {
                     onChange={handleChange}
                     required
                 />
+                <br />
+                <textarea 
+                    placeholder="Sheep description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                />
+                <br />
+                <input 
+                    type="string"
+                    value={formData.dateOfBirth.toDateString()}
+                    placeholder="Date of birth"
+                />
+                    
                 <Calendar value={formData.dateOfBirth} onChange={handleDate} />
                 <input
                     type="submit"

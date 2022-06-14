@@ -1,0 +1,10 @@
+.sheep {
+    list-style-type: none;
+    background-color: aliceblue;
+}
+
+.sheep li {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+}

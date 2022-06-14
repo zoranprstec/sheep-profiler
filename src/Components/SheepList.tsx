@@ -1,4 +1,5 @@
 import { useDB, useFind } from "react-pouchdb"
+import "./SheepList.css"
 
 export default function SheepList() {
     const db = useDB('sheep_database')
@@ -11,13 +12,15 @@ export default function SheepList() {
     })
       .map((sheep: any) => (
         <li key={sheep._id}>
-            {sheep.name} | {sheep.dateOfBirth}
+            <p>{sheep.name}</p>
+            <p>{sheep.dateOfBirth}</p>
+            <p>{sheep.description}</p>
             <button onClick={() => db.remove(sheep)}>Remove</button>
         </li>
     ))
 
     return (
-        <ul>
+        <ul className="sheep">
             {sheepList}
         </ul>
     )
