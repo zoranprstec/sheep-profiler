@@ -1,7 +1,11 @@
-import { Suspense, SyntheticEvent, useState, lazy } from "react"
+import { Suspense, SyntheticEvent, useState, lazy, useEffect } from "react"
 import { useDB, useFind } from "react-pouchdb"
 import Calendar from "react-calendar"
+import Loading from "../Components/Loading"
 import 'react-calendar/dist/Calendar.css'
+import "./SheepManager.css"
+import ShowCalendar from "../Functions/ShowCalendar"
+import HideCalendar from "../Functions/HideCalendar"
 
 const SheepList = lazy(() => import("../Components/SheepList"))
 
@@ -25,8 +29,15 @@ export default function SheepManager() {
     })
     const db = useDB('sheep_database')
 
+    useEffect(() => {
+        window.addEventListener("click", HideCalendar)
+        return () => {
+            window.removeEventListener("click", HideCalendar)
+        }
+    }, [])
+
+
     function handleDate (event: Date) {
-        console.log(event)
         setFormData(prevState => ({
             ...prevState,
             dateOfBirth: event
@@ -49,19 +60,20 @@ export default function SheepManager() {
             description: formData.description
         })
           .then(function (response: responseTypes) {
-              console.log(response)
+            console.log(response)
           })
           .catch(function (err: any) {
-          console.log(err)
-          alert(err)        // TODO: alert zamijeni s nečim ljepšim
+            console.log(err)
+            alert(err)                  // TODO: alert zamijeni s nečim ljepšim
           })
         
         event.preventDefault()
     }
 
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
+        <div className="manager">
+            <form className="manager-form" onSubmit={handleSubmit}>
+                <p>Sheep name:</p>
                 <input
                     type="string"
                     placeholder="Sheep name"
@@ -69,27 +81,30 @@ export default function SheepManager() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                />
-                <br />
+                    />
+                <p>Sheep description:</p>
                 <textarea 
                     placeholder="Sheep description"
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                />
-                <br />
-                <input 
+                    />
+                <p>Date of birth:</p>
+                <input
                     type="string"
                     value={formData.dateOfBirth.toDateString()}
+                    onClick={ShowCalendar}
                     placeholder="Date of birth"
-                />
-                    
-                <Calendar value={formData.dateOfBirth} onChange={handleDate} />
+                    readOnly
+                    />
+                <div className="modal" id="modal">
+                    <Calendar className="calendar" value={formData.dateOfBirth} onChange={handleDate} />
+                </div>
                 <input
                     type="submit"
-                />
+                    />
             </form>
-            <Suspense fallback={<h1>Loading...</h1>}>
+            <Suspense fallback={<Loading />}>
                 <SheepList />
             </Suspense>
         </div>
