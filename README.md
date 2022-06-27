@@ -4,16 +4,16 @@
 
 This project aims to ease the process of cataloging your livestock.
 Planned features:
-    [ ] adding sheep profile
-    [ ] editing sheep profile
-    [ ] local based database
-    [ ] photo uploading
-    [ ] family tree visualisation
-    [ ] easy-to-use UI
-    [ ] 
-    [ ] 
-    [ ] 
-    [ ] 
+   - [ ] adding sheep profile
+   - [ ] editing sheep profile
+   - [ ] local based database
+   - [ ] photo uploading
+   - [ ] family tree visualisation
+   - [ ] easy-to-use UI
+   - [ ] 
+   - [ ] 
+   - [ ] 
+   - [ ] 
 
 ## Available Scripts
 
