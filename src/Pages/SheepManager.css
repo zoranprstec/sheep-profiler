@@ -9,6 +9,10 @@
     gap: 1em;
 }
 
+.manager-form textarea {
+    font-family: 'Roboto', sans-serif;
+}
+
 .calendar {
     grid-column: 1 / span 2;
     grid-row: 4 / 5;
