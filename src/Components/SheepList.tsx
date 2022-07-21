@@ -10,9 +10,29 @@ interface sheepTypes {
     picture: string
 }
 
+interface entryTypes {
+    doc: {
+        _id: string,
+        _rev: string,
+        dateOfBirth: string,
+        description: string,
+        name: string
+        _attachments: {
+            ["sheeppic.jpg"]: {
+                content_type: string,
+                data: string,
+                digest: string
+            }
+        }
+    },
+    id: string,
+    key: string,
+    value: object
+}
+
 function SheepList() {
     const [src, setSrc] = useState([""])
-    const [sheepArray, setSheepArray] = useState([]) 
+    const [sheepArray, setSheepArray] = useState<Array<entryTypes>>([]) 
     const [sheepNode, setSheepNode] = useState([])
     const db = useDB('sheep_database')
 
@@ -23,7 +43,8 @@ function SheepList() {
      *      state u kojem se drži sheepList
      * - [ ] istraži nešto kao db.updated, neka metoda koja se izvršavva kad se db updejta
      *      možda db slati u ovu komponentu kao prop?
-     */ 
+     * -> postoji db.changes(options) koji stvara event listener koji izvršava kod kad detektira promjene
+    */ 
     
     // db.getAttachment("Franka", "sheep-pic.jpg")
     // .then((blob: any) => {
@@ -35,59 +56,82 @@ function SheepList() {
     //     console.log(err)
     // })
 
-    const sheepList = useFind(db, {
-        selector: {
-            name: { $gte: null }      // $gte znači "greater than or equal"; pronalazi sve entryje
-        },
-        sort: ["name"],
-        attachments: true
-    })
-    
-    if (sheepList.length > 0) {
-        for (const sheep of sheepList) {
-
-            db.getAttachment(sheep._id, "sheeppic.jpg")
-            .then((blob: any) => {
-                var reader = new FileReader();
-                reader.readAsDataURL(blob); 
-                reader.onloadend = () => {
-                    Object.defineProperty(sheep, 'picture', {
-                        value: reader.result as string
-                    })}
-                })
-            .catch((err: any) => {
-                console.log(err)
-            })
-        }
-    }
-
     useEffect(() => {
-        setSheepArray(sheepList)
-        console.log("sheepArray set")
+        db.allDocs({
+            include_docs: true,
+            attachments: true
+        }).then((result: any) => {
+            const filteredResults = result.rows.filter((entry: any) => !entry.id.includes("_design"))
+            setSheepArray(filteredResults)
+        }).catch((err: any) => {
+            console.log(err);
+        })
     }, [db])
 
+    // const sheepList = useFind(db, {
+    //     selector: {
+    //         name: { $gte: null }      // $gte znači "greater than or equal"; pronalazi sve entryje
+    //     },
+    //     sort: ["name"],
+    //     attachments: true
+    // })
+    
+    // if (sheepList.length > 0) {
+    //     for (const sheep of sheepList) {
 
-    // console.log(sheepArray)
-    
-    // Ovo ne ide u useEffect, jer je ovo "useFind"; hooks ne smijemo stavljati u callback.
-    // Hooks moraju biti Top level.
-    
+    //         db.getAttachment(sheep._id, "sheeppic.jpg")
+    //         .then((blob: any) => {
+    //             var reader = new FileReader();
+    //             reader.readAsDataURL(blob); 
+    //             reader.onloadend = () => {
+    //                 Object.defineProperty(sheep, 'picture', {
+    //                     value: reader.result as string
+    //                 })}
+    //             })
+    //         .catch((err: any) => {
+    //             console.log(err)
+    //         })
+    //     }
+    // }
+
+    // data:image/jpeg;base64,
+
     // useEffect(() => {
     //     setSheepArray(sheepList)
+
+    //     let changes = db.changes({
+    //         since: 'now',
+    //         live: true,
+    //         include_docs: true
+    //     }).on('change', function(change: any) {
+    //         console.log(change)
+    //         // handle change
+    //     }).on('complete', function(info: any) {
+    //         // changes() was canceled
+    //     }).on('error', function (err: any) {
+    //         console.log(err);
+    //     });
+
+    //     return (
+    //         changes.cancel()
+    //     )
     // }, [])
     
-    const sheepListed = sheepArray.map((sheep: sheepTypes) => {
+
+    console.log(sheepArray[0])
+
+    const sheepListed = sheepArray.map((sheep: entryTypes) => {
         return (
-            <li key={sheep._id}>
-            <img width={"100px"} alt="sheepic" src={sheep.picture}></img>
-            <p>{sheep.name}</p>
-            <p>{new Date(sheep.dateOfBirth).toLocaleDateString()}</p>
-            <p>{sheep.description}</p>
-            <button onClick={() => db.remove(sheep)}>Remove</button>
+            <li key={sheep.doc._id}>
+            <img width={"100px"} alt="sheepic" src={`data:image/jpeg;base64,${sheep.doc._attachments["sheeppic.jpg"].data}`}></img>
+            <p>{sheep.doc.name}</p>
+            <p>{new Date(sheep.doc.dateOfBirth).toLocaleDateString()}</p>
+            <p>{sheep.doc.description}</p>
+            <button onClick={() => db.remove(sheep.doc)}>Remove</button>
         </li>
     )})
 
-    console.log("SheepList component rendered")
+    // console.log("SheepList component rendered")
     
     return (
         <ul className="sheep">
