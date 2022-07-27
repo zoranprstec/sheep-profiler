@@ -6,7 +6,6 @@ import Home from './Pages/Home';
 import About from './Pages/About';
 import Layout from './Pages/Layout';
 import Loading from "./Components/Loading";
-// import SheepManager from "./Pages/SheepManager";
 
 const LazyManager = lazy(() => import ("./Pages/SheepManager")) ;
 

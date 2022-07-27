@@ -4,7 +4,6 @@ import Calendar from "react-calendar"
 import Loading from "../Components/Loading"
 import ShowCalendar from "../Functions/ShowCalendar"
 import HideCalendar from "../Functions/HideCalendar"
-import { read } from "fs"
 import 'react-calendar/dist/Calendar.css'
 import "./SheepManager.css"
 
@@ -15,11 +14,6 @@ const SheepList = lazy(() => import("../Components/SheepList"))
  * - [X] Zašto imamo 2 rendera na SheepManager?
  *      -no fucking idea
  */
-
-interface sheepTypes {
-    name: string
-    dateOfBirth: Date
-}
 
 interface responseTypes {
     id: string
@@ -32,7 +26,10 @@ export default function SheepManager() {
     const [formData, setFormData] = useState({
         name: "",
         dateOfBirth: new Date(),
-        description: ""
+        description: "",
+        sex: "female",
+        status: "available",
+        dateOfEvent: new Date()
     })
     const [attachment, setAttachment] = useState<string | ArrayBuffer | null>("")
     const db = useDB('sheep_database')
@@ -45,18 +42,27 @@ export default function SheepManager() {
     }, [])
 
 
-    function handleDate (event: Date) {
+    function handleBirthDate (event: Date) {
         setFormData(prevState => ({
             ...prevState,
             dateOfBirth: event
         }))
     }
 
+    function handleEventDate (event: Date) {
+        setFormData(prevState => ({
+            ...prevState,
+            dateOfEvent: event
+        }))
+    }
+    
+
     function handleChange(event: SyntheticEvent) {
-        const {name, value} = event.target as HTMLInputElement
+        const {name, value, checked} = event.target as HTMLInputElement
         setFormData(prevState => ({
             ...prevState,
             [name]: value
+            // [name]: checked ? value === "female" : value
         }))
     }
 
@@ -66,10 +72,11 @@ export default function SheepManager() {
             name: formData.name,
             dateOfBirth: formData.dateOfBirth,
             description: formData.description,
+            isFemale: formData.sex,
             _attachments: {
                 "sheeppic.jpg": {
                     content_type: "image/jpeg",
-                    data: attachment?.slice(23)
+                    data: attachment?.slice(23)     // TODO: nešto robusnije od hardcoded slice(23)
                 }
             }
         })
@@ -84,14 +91,6 @@ export default function SheepManager() {
         
         event.preventDefault()
     }
-    
-    // function printFile(file: File) {
-    //     const reader = new FileReader();
-    //     reader.onload = function(evt) {
-    //         console.log(evt.target.result);
-    //     };
-    //     reader.readAsText(file);
-    // }
 
     function toBase64(file: File) {
         let reader = new FileReader()
@@ -110,9 +109,12 @@ export default function SheepManager() {
 
     // console.log("SheepManager rendered")
 
+    const additionalInfo = formData.status === "sold" || formData.status === "dead"
+
     return (
         <div className="manager">
             <form className="manager-form" onSubmit={handleSubmit}>
+
                 <p>Sheep name:</p>
                 <input
                     type="string"
@@ -121,14 +123,16 @@ export default function SheepManager() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    />
+                />
+
                 <p>Sheep description:</p>
                 <textarea 
                     placeholder="Npr. boja dlake, specifične šare, veličina..."
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    />
+                />
+
                 <p>Date of birth:</p>
                 <input
                     type="string"
@@ -136,10 +140,11 @@ export default function SheepManager() {
                     onClick={ShowCalendar}
                     placeholder="Date of birth"
                     readOnly
-                    />
+                />
                 <div className="modal" id="modal">
-                    <Calendar className="calendar" value={formData.dateOfBirth} onChange={handleDate} />
+                    <Calendar className="calendar" value={formData.dateOfBirth} onChange={handleBirthDate} />
                 </div>
+
                 <p>Sheep picture:</p>
                 <input
                     type="file"
@@ -147,10 +152,84 @@ export default function SheepManager() {
                     onChange={fileChange}
                     required
                 />
+
+                <p>Sheep sex: </p>
+                <div>
+                    <label>
+                        <input
+                            type="radio"
+                            value="female"
+                            checked={formData.sex === "female"}
+                            onChange={handleChange}
+                            name="sex"
+                        />
+                        Žensko
+                    </label>
+                    <label>
+                        <input
+                            type="radio"
+                            value="male"
+                            checked={formData.sex === "male"}
+                            onChange={handleChange}
+                            name="sex"
+                        />
+                        Muško
+                    </label>
+                </div>
+
+                <p>Status of sheep: </p>
+                <div>
+                    <label>
+                        <input
+                            type="radio"
+                            value="available"
+                            checked={formData.status === "available"}
+                            onChange={handleChange}
+                            name="status"
+                        />
+                        Kod nas
+                    </label>
+                    <label>
+                        <input
+                            type="radio"
+                            value="sold"
+                            checked={formData.status === "sold"}
+                            onChange={handleChange}
+                            name="status"
+                        />
+                        Prodana
+                    </label>
+                    <label>
+                        <input
+                            type="radio"
+                            value="dead"
+                            checked={formData.status === "dead"}
+                            onChange={handleChange}
+                            name="status"
+                        />
+                        Uginula ili zaklana
+                    </label>
+                </div>
+
+                {/* {additionalInfo && <p>Date of event: </p>}
+                {additionalInfo && 
+                <input
+                    type="string"
+                    value={formData.dateOfEvent.toDateString()}
+                    onClick={() => ShowCalendar({id: "modal-add"})}
+                    placeholder="Date of event"
+                    readOnly
+                />}
+                {additionalInfo &&
+                <div className="modal" id="modal-add">
+                    <Calendar className="calendar" value={formData.dateOfEvent} onChange={handleEventDate} />
+                </div>} */}
+
                 <input
                     type="submit"
                     />
                 {attachment && <img alt="what" src={attachment as string} width="200px"></img>}
+
             </form>
             <Suspense fallback={<Loading />}>
                 <SheepList />

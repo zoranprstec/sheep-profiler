@@ -2,14 +2,6 @@ import { useEffect, useState, memo } from "react"
 import { useDB, useFind} from "react-pouchdb"
 import "./SheepList.css"
 
-interface sheepTypes {
-    _id: string,
-    name: string,
-    dateOfBirth: string,
-    description: string,
-    picture: string
-}
-
 interface entryTypes {
     doc: {
         _id: string,
@@ -31,9 +23,7 @@ interface entryTypes {
 }
 
 function SheepList() {
-    const [src, setSrc] = useState([""])
     const [sheepArray, setSheepArray] = useState<Array<entryTypes>>([]) 
-    const [sheepNode, setSheepNode] = useState([])
     const [renderTrigger, setRenderTrigger] = useState(0)
     const db = useDB('sheep_database')
 
@@ -46,16 +36,6 @@ function SheepList() {
      *      možda db slati u ovu komponentu kao prop?
      * -> postoji db.changes(options) koji stvara event listener koji izvršava kod kad detektira promjene
     */ 
-    
-    // db.getAttachment("Franka", "sheep-pic.jpg")
-    // .then((blob: any) => {
-    //     console.log(blob)
-    //     let url = URL.createObjectURL(blob)
-    //     setSrc(url)
-    // })
-    // .catch((err: any) => {
-    //     console.log(err)
-    // })
 
     useEffect(() => {
         db.allDocs({
@@ -69,61 +49,11 @@ function SheepList() {
         })
     }, [db, renderTrigger])
 
-    // const sheepList = useFind(db, {
-    //     selector: {
-    //         name: { $gte: null }      // $gte znači "greater than or equal"; pronalazi sve entryje
-    //     },
-    //     sort: ["name"],
-    //     attachments: true
-    // })
-    
-    // if (sheepList.length > 0) {
-    //     for (const sheep of sheepList) {
-
-    //         db.getAttachment(sheep._id, "sheeppic.jpg")
-    //         .then((blob: any) => {
-    //             var reader = new FileReader();
-    //             reader.readAsDataURL(blob); 
-    //             reader.onloadend = () => {
-    //                 Object.defineProperty(sheep, 'picture', {
-    //                     value: reader.result as string
-    //                 })}
-    //             })
-    //         .catch((err: any) => {
-    //             console.log(err)
-    //         })
-    //     }
-    // }
-
-    // data:image/jpeg;base64,
-
-    // useEffect(() => {
-    //     setSheepArray(sheepList)
-
-    //     let changes = db.changes({
-    //         since: 'now',
-    //         live: true,
-    //         include_docs: true
-    //     }).on('change', function(change: any) {
-    //         console.log(change)
-    //         // handle change
-    //     }).on('complete', function(info: any) {
-    //         // changes() was canceled
-    //     }).on('error', function (err: any) {
-    //         console.log(err);
-    //     });
-
-    //     return (
-    //         changes.cancel()
-    //     )
-    // }, [])
-
     function removeSheep(doc: any) {
         db.remove(doc)
         setRenderTrigger(prev => prev + 1)
     }
     
-
     // console.log("SheepList rendered: " + sheepArray[0])
 
     const sheepListed = sheepArray.map((sheep: entryTypes) => {
