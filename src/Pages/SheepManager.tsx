@@ -10,6 +10,12 @@ import "./SheepManager.css"
 
 const SheepList = lazy(() => import("../Components/SheepList"))
 
+/**
+ * TODO:
+ * - [X] Zašto imamo 2 rendera na SheepManager?
+ *      -no fucking idea
+ */
+
 interface sheepTypes {
     name: string
     dateOfBirth: Date
@@ -53,7 +59,6 @@ export default function SheepManager() {
             [name]: value
         }))
     }
-    // console.log(attachment)
 
     function handleSubmit(event: SyntheticEvent) {
         db.put({
@@ -68,13 +73,14 @@ export default function SheepManager() {
                 }
             }
         })
-          .then(function (response: responseTypes) {
+        .then(function (response: responseTypes) {
             console.log(response)
-          })
-          .catch(function (err: any) {
+            window.location.reload()
+        })
+        .catch(function (err: any) {
             console.log(err)
             alert(err)                  // TODO: alert zamijeni s nečim ljepšim
-          })
+        })
         
         event.preventDefault()
     }
@@ -98,10 +104,11 @@ export default function SheepManager() {
         }
     }
 
-
     function fileChange(event: any) {
         event.target.files[0] && toBase64(event.target.files[0])
     }
+
+    // console.log("SheepManager rendered")
 
     return (
         <div className="manager">

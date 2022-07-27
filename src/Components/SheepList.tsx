@@ -34,6 +34,7 @@ function SheepList() {
     const [src, setSrc] = useState([""])
     const [sheepArray, setSheepArray] = useState<Array<entryTypes>>([]) 
     const [sheepNode, setSheepNode] = useState([])
+    const [renderTrigger, setRenderTrigger] = useState(0)
     const db = useDB('sheep_database')
 
     /**
@@ -66,7 +67,7 @@ function SheepList() {
         }).catch((err: any) => {
             console.log(err);
         })
-    }, [db])
+    }, [db, renderTrigger])
 
     // const sheepList = useFind(db, {
     //     selector: {
@@ -116,9 +117,14 @@ function SheepList() {
     //         changes.cancel()
     //     )
     // }, [])
+
+    function removeSheep(doc: any) {
+        db.remove(doc)
+        setRenderTrigger(prev => prev + 1)
+    }
     
 
-    console.log(sheepArray[0])
+    // console.log("SheepList rendered: " + sheepArray[0])
 
     const sheepListed = sheepArray.map((sheep: entryTypes) => {
         return (
@@ -127,12 +133,10 @@ function SheepList() {
             <p>{sheep.doc.name}</p>
             <p>{new Date(sheep.doc.dateOfBirth).toLocaleDateString()}</p>
             <p>{sheep.doc.description}</p>
-            <button onClick={() => db.remove(sheep.doc)}>Remove</button>
+            <button onClick={() => removeSheep(sheep.doc)}>Remove</button>
         </li>
     )})
 
-    // console.log("SheepList component rendered")
-    
     return (
         <ul className="sheep">
             {sheepListed}
