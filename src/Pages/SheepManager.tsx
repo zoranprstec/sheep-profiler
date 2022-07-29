@@ -1,6 +1,7 @@
-import { Suspense, SyntheticEvent, useState, lazy, useEffect } from "react"
+import { Suspense, SyntheticEvent, useState, lazy, useEffect, useRef } from "react"
 import { useDB } from "react-pouchdb"
 import Calendar from "react-calendar"
+import CalendarComp from "../Components/CalendarComp"
 import Loading from "../Components/Loading"
 import ShowCalendar from "../Functions/ShowCalendar"
 import HideCalendar from "../Functions/HideCalendar"
@@ -32,7 +33,9 @@ export default function SheepManager() {
         dateOfEvent: new Date()
     })
     const [attachment, setAttachment] = useState<string | ArrayBuffer | null>("")
+    const [calendarProps, setCalendarProps] = useState("")
     const db = useDB('sheep_database')
+    const dateRef = useRef<any>(null)
 
     useEffect(() => {
         window.addEventListener("click", HideCalendar)
@@ -41,21 +44,19 @@ export default function SheepManager() {
         }
     }, [])
 
+    // function handleBirthDate (event: Date) {
+    //     setFormData(prevState => ({
+    //         ...prevState,
+    //         dateOfBirth: event
+    //     }))
+    // }
 
-    function handleBirthDate (event: Date) {
-        setFormData(prevState => ({
-            ...prevState,
-            dateOfBirth: event
-        }))
-    }
-
-    function handleEventDate (event: Date) {
-        setFormData(prevState => ({
-            ...prevState,
-            dateOfEvent: event
-        }))
-    }
-    
+    // function handleEventDate (event: Date) {
+    //     setFormData(prevState => ({
+    //         ...prevState,
+    //         dateOfEvent: event
+    //     }))
+    // }
 
     function handleChange(event: SyntheticEvent) {
         const {name, value, checked} = event.target as HTMLInputElement
@@ -107,6 +108,12 @@ export default function SheepManager() {
         event.target.files[0] && toBase64(event.target.files[0])
     }
 
+    function handleCalendar(event: SyntheticEvent) {
+        const {name} = event.target as HTMLInputElement
+        setCalendarProps(name)
+        ShowCalendar()
+    }
+
     // console.log("SheepManager rendered")
 
     const additionalInfo = formData.status === "sold" || formData.status === "dead"
@@ -137,13 +144,14 @@ export default function SheepManager() {
                 <input
                     type="string"
                     value={formData.dateOfBirth.toDateString()}
-                    onClick={ShowCalendar}
+                    onClick={handleCalendar}
                     placeholder="Date of birth"
+                    name="dateOfBirth"
                     readOnly
                 />
-                <div className="modal" id="modal">
-                    <Calendar className="calendar" value={formData.dateOfBirth} onChange={handleBirthDate} />
-                </div>
+                {/* <Calendar className="calendar" value={formData.dateOfBirth} onChange={handleBirthDate} /> */}
+                {/* <CalendarComp obj={{dateOfBirth: formData.dateOfBirth, setFormData: setFormData}} /> */}
+                {/* <h1>hello</h1> */}
 
                 <p>Sheep picture:</p>
                 <input
@@ -211,19 +219,17 @@ export default function SheepManager() {
                     </label>
                 </div>
 
-                {/* {additionalInfo && <p>Date of event: </p>}
+                {additionalInfo && <p>Date of event: </p>}
                 {additionalInfo && 
                 <input
                     type="string"
                     value={formData.dateOfEvent.toDateString()}
-                    onClick={() => ShowCalendar({id: "modal-add"})}
+                    onClick={handleCalendar}
                     placeholder="Date of event"
+                    name="dateOfEvent"
                     readOnly
                 />}
-                {additionalInfo &&
-                <div className="modal" id="modal-add">
-                    <Calendar className="calendar" value={formData.dateOfEvent} onChange={handleEventDate} />
-                </div>} */}
+                {/* {additionalInfo && <CalendarComp obj={{dateOfEvent: formData.dateOfEvent, setFormData: setFormData}} />} */}
 
                 <input
                     type="submit"
@@ -231,6 +237,7 @@ export default function SheepManager() {
                 {attachment && <img alt="what" src={attachment as string} width="200px"></img>}
 
             </form>
+            <CalendarComp dateName={calendarProps} setFormData={setFormData} formData={formData} />
             <Suspense fallback={<Loading />}>
                 <SheepList />
             </Suspense>
