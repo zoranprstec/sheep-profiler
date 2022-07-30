@@ -30,7 +30,8 @@ export default function SheepManager() {
         description: "",
         sex: "female",
         status: "available",
-        dateOfEvent: new Date()
+        dateOfEvent: new Date(),
+        additionalNotes: ""
     })
     const [attachment, setAttachment] = useState<string | ArrayBuffer | null>("")
     const [calendarProps, setCalendarProps] = useState("")
@@ -43,20 +44,6 @@ export default function SheepManager() {
             window.removeEventListener("click", HideCalendar)
         }
     }, [])
-
-    // function handleBirthDate (event: Date) {
-    //     setFormData(prevState => ({
-    //         ...prevState,
-    //         dateOfBirth: event
-    //     }))
-    // }
-
-    // function handleEventDate (event: Date) {
-    //     setFormData(prevState => ({
-    //         ...prevState,
-    //         dateOfEvent: event
-    //     }))
-    // }
 
     function handleChange(event: SyntheticEvent) {
         const {name, value, checked} = event.target as HTMLInputElement
@@ -73,7 +60,10 @@ export default function SheepManager() {
             name: formData.name,
             dateOfBirth: formData.dateOfBirth,
             description: formData.description,
-            isFemale: formData.sex,
+            sex: formData.sex,
+            status: formData.status,
+            dateOfEvent: formData.dateOfEvent,
+            additionalNotes: formData.additionalNotes,
             _attachments: {
                 "sheeppic.jpg": {
                     content_type: "image/jpeg",
@@ -149,9 +139,6 @@ export default function SheepManager() {
                     name="dateOfBirth"
                     readOnly
                 />
-                {/* <Calendar className="calendar" value={formData.dateOfBirth} onChange={handleBirthDate} /> */}
-                {/* <CalendarComp obj={{dateOfBirth: formData.dateOfBirth, setFormData: setFormData}} /> */}
-                {/* <h1>hello</h1> */}
 
                 <p>Sheep picture:</p>
                 <input
@@ -229,7 +216,14 @@ export default function SheepManager() {
                     name="dateOfEvent"
                     readOnly
                 />}
-                {/* {additionalInfo && <CalendarComp obj={{dateOfEvent: formData.dateOfEvent, setFormData: setFormData}} />} */}
+                {additionalInfo && <p>Notes on event: </p>}
+                {additionalInfo && 
+                <textarea 
+                    placeholder="Dodatne bilješke o događaju"
+                    name="additionalNotes"
+                    value={formData.additionalNotes}
+                    onChange={handleChange}
+                />}
 
                 <input
                     type="submit"
@@ -246,3 +240,5 @@ export default function SheepManager() {
 }
 
 // 7-6-2022  
+
+// ♀ ♂

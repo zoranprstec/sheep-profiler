@@ -8,3 +8,31 @@
     flex-direction: row;
     gap: 1.5rem;
 }
+
+.prompt {
+    /* display: none; */
+    position: fixed;
+    width: 300px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fafafa;
+    box-shadow: 0 0 4px 1px black;
+    border-radius: 4px;
+    padding: 1.5em 1em;
+}
+
+.prompt-title {
+    margin: 0;
+}
+
+.prompt-button {
+    padding: 6px 12px;
+    margin-right: 20px;
+    margin-left: 20px;
+}
+
+.prompt-button-container {
+    display: flex;
+    justify-content: center;
+}

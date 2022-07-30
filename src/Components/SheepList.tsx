@@ -6,9 +6,13 @@ interface entryTypes {
     doc: {
         _id: string,
         _rev: string,
-        dateOfBirth: string,
+        name: string,
         description: string,
-        name: string
+        dateOfBirth: string,
+        sex: string,
+        status: string,
+        dateOfEvent: Date,
+        additionalNotes: string,
         _attachments: {
             ["sheeppic.jpg"]: {
                 content_type: string,
@@ -29,12 +33,7 @@ function SheepList() {
 
     /**
      * TODO:
-     * - [X] useFind se izvrši svaki put kad imamo re-render, izvrši samo kad se promijeni "db"
-     * - [X] db.getAttachment izvrti preko "for each" na sheepList i onda rezultat priključi na
-     *      state u kojem se drži sheepList
-     * - [ ] istraži nešto kao db.updated, neka metoda koja se izvršavva kad se db updejta
-     *      možda db slati u ovu komponentu kao prop?
-     * -> postoji db.changes(options) koji stvara event listener koji izvršava kod kad detektira promjene
+     * 
     */ 
 
     useEffect(() => {
@@ -54,8 +53,6 @@ function SheepList() {
         setRenderTrigger(prev => prev + 1)
     }
     
-    // console.log("SheepList rendered: " + sheepArray[0])
-
     const sheepListed = sheepArray.map((sheep: entryTypes) => {
         return (
             <li key={sheep.doc._id}>
@@ -66,11 +63,24 @@ function SheepList() {
             <button onClick={() => removeSheep(sheep.doc)}>Remove</button>
         </li>
     )})
-
+    
+    // console.log("SheepList rendered: " + sheepArray[0])
     return (
-        <ul className="sheep">
-            {sheepListed}
-        </ul>
+        <div>
+            <ul className="sheep">
+                {sheepListed}
+            </ul>
+            <div className="prompt">
+                <h2 className="prompt-title">Confirm choice</h2>
+                <p className="prompt-text">
+                    Are you sure you want to delete this animal? This process cannot be reversed.
+                </p>
+                <div className="prompt-button-container">
+                    <button className="prompt-button">Yes</button>
+                    <button className="prompt-button">No</button>
+                </div>
+            </div>
+        </div>
     )
 }
 
