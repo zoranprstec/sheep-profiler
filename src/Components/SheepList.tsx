@@ -2,31 +2,37 @@ import { useEffect, useState, memo } from "react"
 import { useDB, useFind} from "react-pouchdb"
 import "./SheepList.css"
 
-interface entryTypes {
-    doc: {
-        _id: string,
-        _rev: string,
-        name: string,
-        description: string,
-        dateOfBirth: string,
-        sex: string,
-        status: string,
-        dateOfEvent: Date,
-        additionalNotes: string,
-        _attachments: {
-            ["sheeppic.jpg"]: {
-                content_type: string,
-                data: string,
-                digest: string
-            }
-        }
-    },
+export interface entryTypes {
+    doc: docTypes,
     id: string,
     key: string,
     value: object
 }
 
-function SheepList() {
+export interface docTypes {
+    _id: string,
+    _rev: string,
+    name: string,
+    description: string,
+    dateOfBirth: Date,
+    sex: string,
+    status: string,
+    dateOfEvent: Date,
+    additionalNotes: string,
+    _attachments: {
+        ["sheeppic.jpg"]: {
+            content_type: string,
+            data: string,
+            digest: string
+        }
+    }
+}
+
+interface SheepListProps {
+    editSheep: (arg1: docTypes) => void
+}
+
+function SheepList(props: SheepListProps) {
     const [sheepArray, setSheepArray] = useState<Array<entryTypes>>([]) 
     const [renderTrigger, setRenderTrigger] = useState(0)
     const db = useDB('sheep_database')
@@ -49,8 +55,12 @@ function SheepList() {
     }, [db, renderTrigger])
 
     function removeSheep(doc: any) {
-        db.remove(doc)
-        setRenderTrigger(prev => prev + 1)
+        if (window.confirm('Are you sure?')) {
+            db.remove(doc)
+            setRenderTrigger(prev => prev + 1)
+          } else {
+            console.log("Removal canceled")
+        }
     }
     
     const sheepListed = sheepArray.map((sheep: entryTypes) => {
@@ -61,6 +71,7 @@ function SheepList() {
             <p>{new Date(sheep.doc.dateOfBirth).toLocaleDateString()}</p>
             <p>{sheep.doc.description}</p>
             <button onClick={() => removeSheep(sheep.doc)}>Remove</button>
+            <button onClick={() => props.editSheep(sheep.doc)}>Edit</button>
         </li>
     )})
     
@@ -70,16 +81,6 @@ function SheepList() {
             <ul className="sheep">
                 {sheepListed}
             </ul>
-            <div className="prompt">
-                <h2 className="prompt-title">Confirm choice</h2>
-                <p className="prompt-text">
-                    Are you sure you want to delete this animal? This process cannot be reversed.
-                </p>
-                <div className="prompt-button-container">
-                    <button className="prompt-button">Yes</button>
-                    <button className="prompt-button">No</button>
-                </div>
-            </div>
         </div>
     )
 }

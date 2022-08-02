@@ -7,6 +7,7 @@ import ShowCalendar from "../Functions/ShowCalendar"
 import HideCalendar from "../Functions/HideCalendar"
 import 'react-calendar/dist/Calendar.css'
 import "./SheepManager.css"
+import { docTypes } from "../Components/SheepList"
 
 const SheepList = lazy(() => import("../Components/SheepList"))
 
@@ -22,9 +23,19 @@ interface responseTypes {
     rev: string
 }
 
+interface formDataTypes {
+    name: string,
+    dateOfBirth: Date|string,
+    description: string,
+    sex: string,
+    status: string,
+    dateOfEvent: Date|string,
+    additionalNotes: string
+}
+
 // stranica na kojoj se uređuju podaci o ovci
 export default function SheepManager() {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<formDataTypes>({
         name: "",
         dateOfBirth: new Date(),
         description: "",
@@ -37,6 +48,27 @@ export default function SheepManager() {
     const [calendarProps, setCalendarProps] = useState("")
     const db = useDB('sheep_database')
     const dateRef = useRef<any>(null)
+
+    console.log(formData)
+    
+    const sheepDoc = {
+        _id: formData.name,
+        name: formData.name,
+        // dateOfBirth: Date.parse(formData.dateOfBirth as string),
+        dateOfBirth: formData.dateOfBirth as string,
+        description: formData.description,
+        sex: formData.sex,
+        status: formData.status,
+        // dateOfEvent: Date.parse(formData.dateOfEvent as string),
+        dateOfEvent: formData.dateOfEvent,
+        additionalNotes: formData.additionalNotes,
+        _attachments: {
+            "sheeppic.jpg": {
+                content_type: "image/jpeg",
+                data: attachment?.slice(23)     // TODO: nešto robusnije od hardcoded slice(23)
+            }
+        }
+    }
 
     useEffect(() => {
         window.addEventListener("click", HideCalendar)
@@ -54,34 +86,67 @@ export default function SheepManager() {
         }))
     }
 
+    function editSheep(doc: docTypes) {
+        setFormData({
+            name: doc.name,
+            dateOfBirth: new Date(doc.dateOfBirth),
+            description: doc.description,
+            sex: doc.sex,
+            status: doc.status,
+            dateOfEvent: new Date(doc.dateOfEvent),
+            additionalNotes: doc.additionalNotes,
+        })
+    }
+
     function handleSubmit(event: SyntheticEvent) {
-        db.put({
-            _id: formData.name,
-            name: formData.name,
-            dateOfBirth: formData.dateOfBirth,
-            description: formData.description,
-            sex: formData.sex,
-            status: formData.status,
-            dateOfEvent: formData.dateOfEvent,
-            additionalNotes: formData.additionalNotes,
-            _attachments: {
-                "sheeppic.jpg": {
-                    content_type: "image/jpeg",
-                    data: attachment?.slice(23)     // TODO: nešto robusnije od hardcoded slice(23)
-                }
-            }
+
+        db.get(formData.name)
+        .then((doc: any) => {
+            if (window.confirm(`Update ${doc._id}?`)) {
+            db.put({
+                _rev: doc._rev,
+                ...sheepDoc
+            })
+            .then(function (response: responseTypes) {
+                console.log(response)
+                window.location.reload()
+            })
+            .catch(function (err: any) {
+                console.log(err)
+                alert(err)                  // TODO: alert zamijeni s nečim ljepšim
+            })}
         })
-        .then(function (response: responseTypes) {
-            console.log(response)
-            window.location.reload()
-        })
-        .catch(function (err: any) {
-            console.log(err)
-            alert(err)                  // TODO: alert zamijeni s nečim ljepšim
+        .catch(() => {
+            db.put({
+                ...sheepDoc
+            })
+            .then(function (response: responseTypes) {
+                console.log(response)
+                window.location.reload()
+            })
+            .catch(function (err: any) {
+                console.log(err)
+                alert(err)                  // TODO: alert zamijeni s nečim ljepšim
+            })
         })
         
         event.preventDefault()
     }
+    
+    // function updateDB() {
+    //     db.put({
+    //         _rev: doc_rev,
+    //         ...sheepDoc
+    //     })
+    //     .then(function (response: responseTypes) {
+    //         console.log(response)
+    //         window.location.reload()
+    //     })
+    //     .catch(function (err: any) {
+    //         console.log(err)
+    //         alert(err)                  // TODO: alert zamijeni s nečim ljepšim
+    //     })
+    // }
 
     function toBase64(file: File) {
         let reader = new FileReader()
@@ -133,7 +198,7 @@ export default function SheepManager() {
                 <p>Date of birth:</p>
                 <input
                     type="string"
-                    value={formData.dateOfBirth.toDateString()}
+                    value={(formData.dateOfBirth as Date).toDateString()}
                     onClick={handleCalendar}
                     placeholder="Date of birth"
                     name="dateOfBirth"
@@ -145,7 +210,7 @@ export default function SheepManager() {
                     type="file"
                     title="sheep pic"
                     onChange={fileChange}
-                    required
+                    // required
                 />
 
                 <p>Sheep sex: </p>
@@ -210,7 +275,7 @@ export default function SheepManager() {
                 {additionalInfo && 
                 <input
                     type="string"
-                    value={formData.dateOfEvent.toDateString()}
+                    value={(formData.dateOfEvent as Date).toDateString()}
                     onClick={handleCalendar}
                     placeholder="Date of event"
                     name="dateOfEvent"
@@ -233,7 +298,7 @@ export default function SheepManager() {
             </form>
             <CalendarComp dateName={calendarProps} setFormData={setFormData} formData={formData} />
             <Suspense fallback={<Loading />}>
-                <SheepList />
+                <SheepList editSheep={editSheep} />
             </Suspense>
         </div>
     )
