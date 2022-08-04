@@ -1,5 +1,6 @@
 import { useEffect, useState, memo } from "react"
 import { useDB, useFind} from "react-pouchdb"
+import { Link } from "react-router-dom"
 import "./SheepList.css"
 
 export interface entryTypes {
@@ -45,8 +46,10 @@ function SheepList(props: SheepListProps) {
     useEffect(() => {
         db.allDocs({
             include_docs: true,
-            attachments: true
+            attachments: true,
+            startKey: 2
         }).then((result: any) => {
+            console.log(result)
             const filteredResults = result.rows.filter((entry: any) => !entry.id.includes("_design"))
             setSheepArray(filteredResults)
         }).catch((err: any) => {
@@ -65,14 +68,16 @@ function SheepList(props: SheepListProps) {
     
     const sheepListed = sheepArray.map((sheep: entryTypes) => {
         return (
-            <li key={sheep.doc._id}>
-            <img width={"100px"} alt="sheepic" src={`data:image/jpeg;base64,${sheep.doc._attachments["sheeppic.jpg"].data}`}></img>
-            <p>{sheep.doc.name}</p>
-            <p>{new Date(sheep.doc.dateOfBirth).toLocaleDateString()}</p>
-            <p>{sheep.doc.description}</p>
-            <button onClick={() => removeSheep(sheep.doc)}>Remove</button>
-            <button onClick={() => props.editSheep(sheep.doc)}>Edit</button>
-        </li>
+            <Link to={`/sheep-manager/${sheep.doc._id}`} key={sheep.doc._id}>
+                <li>
+                    <img width={"100px"} alt="sheepic" src={`data:image/jpeg;base64,${sheep.doc._attachments["sheeppic.jpg"].data}`}></img>
+                    <p>{sheep.doc.name}</p>
+                    <p>{new Date(sheep.doc.dateOfBirth).toLocaleDateString()}</p>
+                    <p>{sheep.doc.description}</p>
+                    <button onClick={() => removeSheep(sheep.doc)}>Remove</button>
+                    <button onClick={() => props.editSheep(sheep.doc)}>Edit</button>
+                </li>
+            </Link>
     )})
     
     // console.log("SheepList rendered: " + sheepArray[0])

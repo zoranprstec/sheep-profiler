@@ -1,6 +1,6 @@
 import { Suspense, SyntheticEvent, useState, lazy, useEffect, useRef } from "react"
 import { useDB } from "react-pouchdb"
-import Calendar from "react-calendar"
+import { Outlet } from "react-router-dom"
 import CalendarComp from "../Components/CalendarComp"
 import Loading from "../Components/Loading"
 import ShowCalendar from "../Functions/ShowCalendar"
@@ -49,8 +49,6 @@ export default function SheepManager() {
     const db = useDB('sheep_database')
     const dateRef = useRef<any>(null)
 
-    console.log(formData)
-    
     const sheepDoc = {
         _id: formData.name,
         name: formData.name,
@@ -108,7 +106,6 @@ export default function SheepManager() {
                 ...sheepDoc
             })
             .then(function (response: responseTypes) {
-                console.log(response)
                 window.location.reload()
             })
             .catch(function (err: any) {
@@ -116,18 +113,21 @@ export default function SheepManager() {
                 alert(err)                  // TODO: alert zamijeni s nečim ljepšim
             })}
         })
-        .catch(() => {
-            db.put({
-                ...sheepDoc
-            })
-            .then(function (response: responseTypes) {
-                console.log(response)
-                window.location.reload()
-            })
-            .catch(function (err: any) {
+        .catch((err: any) => {
+            if(err.status === 404) {
+                db.put({
+                    ...sheepDoc
+                })
+                .then(function (response: responseTypes) {
+                    window.location.reload()
+                })
+                .catch(function (err: any) {
+                    console.log(err)
+                    alert(err)                  // TODO: alert zamijeni s nečim ljepšim
+                })
+            } else {
                 console.log(err)
-                alert(err)                  // TODO: alert zamijeni s nečim ljepšim
-            })
+            }
         })
         
         event.preventDefault()
@@ -296,6 +296,7 @@ export default function SheepManager() {
                 {attachment && <img alt="what" src={attachment as string} width="200px"></img>}
 
             </form>
+            <Outlet />
             <CalendarComp dateName={calendarProps} setFormData={setFormData} formData={formData} />
             <Suspense fallback={<Loading />}>
                 <SheepList editSheep={editSheep} />
