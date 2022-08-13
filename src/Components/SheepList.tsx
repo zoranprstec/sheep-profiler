@@ -1,33 +1,10 @@
 import { useEffect, useState, memo } from "react"
 import { useDB, useFind} from "react-pouchdb"
 import { Link } from "react-router-dom"
+import { allDocsTypes, docTypes, entryTypes } from "../Types"
 import "./SheepList.css"
 
-export interface entryTypes {
-    doc: docTypes,
-    id: string,
-    key: string,
-    value: object
-}
 
-export interface docTypes {
-    _id: string,
-    _rev: string,
-    name: string,
-    description: string,
-    dateOfBirth: Date,
-    sex: string,
-    status: string,
-    dateOfEvent: Date,
-    additionalNotes: string,
-    _attachments: {
-        ["sheeppic.jpg"]: {
-            content_type: string,
-            data: string,
-            digest: string
-        }
-    }
-}
 
 interface SheepListProps {
     editSheep: (arg1: docTypes) => void
@@ -48,7 +25,7 @@ function SheepList(props: SheepListProps) {
             include_docs: true,
             attachments: true,
             startKey: 2
-        }).then((result: any) => {
+        }).then((result: allDocsTypes) => {
             console.log(result)
             const filteredResults = result.rows.filter((entry: any) => !entry.id.includes("_design"))
             setSheepArray(filteredResults)

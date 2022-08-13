@@ -1,11 +1,7 @@
 import Calendar from "react-calendar"
 import HideCalendar from "../Functions/HideCalendar"
+import { CalendarCompProps } from "../Types"
 
-interface CalendarCompProps {
-    dateName: string,
-    setFormData: (arg1: any) => void,
-    formData: any
-}
 
 export default function CalendarComp({dateName, setFormData, formData}: CalendarCompProps) {
     // console.log(`DateOfBirth: ${dateOfBirth}\nDateOfEvent: ${dateOfEvent}`)

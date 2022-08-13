@@ -7,31 +7,9 @@ import ShowCalendar from "../Functions/ShowCalendar"
 import HideCalendar from "../Functions/HideCalendar"
 import 'react-calendar/dist/Calendar.css'
 import "./SheepManager.css"
-import { docTypes } from "../Components/SheepList"
+import { docTypes, formDataTypes, responseTypes } from "../Types"
 
 const SheepList = lazy(() => import("../Components/SheepList"))
-
-/**
- * TODO:
- * - [X] Zašto imamo 2 rendera na SheepManager?
- *      -no fucking idea
- */
-
-interface responseTypes {
-    id: string
-    ok: boolean
-    rev: string
-}
-
-interface formDataTypes {
-    name: string,
-    dateOfBirth: Date|string,
-    description: string,
-    sex: string,
-    status: string,
-    dateOfEvent: Date|string,
-    additionalNotes: string
-}
 
 // stranica na kojoj se uređuju podaci o ovci
 export default function SheepManager() {
